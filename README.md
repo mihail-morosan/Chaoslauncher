@@ -9,3 +9,9 @@ A lot of the interface is removed too (Only Plugins and Settings pages survive).
 Will (soon) move all settings from the registry to a local .ini file, to allow for multiple instances of ChaosLauncher to have different settings.
 
 WARNING: StarCraft directory currently hard-coded in Launcher_Game.pas, on line 46. You might want to change that.
+
+# Compiling
+
+With Lazarus, open \Source\Launcher\LauncherChaoslauncher.lpi. Build / run. The result will be in \Source\Launcher\Launcher\Build.
+
+# Have fun!
