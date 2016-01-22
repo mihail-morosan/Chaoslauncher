@@ -1,5 +1,7 @@
 unit tvants;
 
+{$MODE Delphi}
+
 interface
 type TTvAntData=record
   Name:String;
@@ -12,7 +14,7 @@ var TvAntsData:array of TTvAntData;
 procedure AddTvAnt(const Name,BaseUrl,Referer:String);
 
 implementation
-uses windows,idhttp,sysutils,shellapi,util,logger;
+uses windows,sysutils,shellapi,Util,logger;
 
 procedure AddTvAnt(const Name,BaseUrl,Referer:String);
 begin
@@ -22,18 +24,7 @@ begin
   TvAntsData[high(TvAntsData)].Referer:=Referer;
 end;
 
-function GetTVAntsUrl(const BaseUrl,Referer:String):String;
-var http:TIdHttp;
-begin
-  http:=nil;
-  try
-    http:=TIdHttp.Create(nil);
-    http.Request.Referer:=Referer;
-    result:=http.Get(BaseUrl+inttostr(random(100000)));
-  finally
-    http.free;
-  end;
-end;
+
 
 
 { TTvAntData }
@@ -45,7 +36,6 @@ begin
   Log('Start TvAnt '+Name);
   Log('BaseUrl: '+BaseUrl);
   Log('Referer: '+Referer);
-  s:=GetTvAntsUrl(BaseUrl,Referer);
   Log('DirectUrl: '+s);
   //if pos('tvants:',s)=0 then raise exception.create('Invalid TvAnts url'#13#10+s);
   error:=shellexecute(0,'open',PChar(s),'','',SW_Normal);

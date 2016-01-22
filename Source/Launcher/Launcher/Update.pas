@@ -1,7 +1,9 @@
 unit Update;
 
+{$MODE Delphi}
+
 interface
-uses sysutils,util,idhttp;
+uses sysutils,Util, FileUtil;
 type EUpdateFailed=class(Exception);
      EUpdateInvalidTempPath=class(EUpdateFailed);
 
@@ -47,7 +49,6 @@ TUpdater=class
     property TempPath:String read FTempPath write SetTempPath;
     property FileCount:integer read GetFileCount;
     function CheckForUpdates(out desc:String):boolean;
-    procedure DownloadUpdates;
     function InstallUpdates:boolean;
     procedure AddFile(ARealName,AUrl:String;Flags:TUpdateFlags=[]);
     destructor Destroy;override;
@@ -60,31 +61,6 @@ var Updater:TUpdater;
 implementation
 uses windows,classes,shellapi,logger,zlib;
 
-function Decompress(const S:String):String;
-var dcs: TDecompressionStream;
-    ssIn:TStringStream;
-    ssOut:TStringStream;
-    buf:array[0..1023]of byte;
-    bread:integer;
-begin
-  ssIn:=nil;
-  dcs:=nil;
-  ssOut:=nil;
-  try
-    ssIn:=TStringStream.create(S);
-    dcs:=TDecompressionStream.Create(ssIn);
-    ssOut:=TStringStream.create('');
-    repeat
-      bread:=dcs.Read(buf,sizeof(buf));
-      ssOut.Write(buf,bread);
-    until bread<>sizeof(buf);
-    result:=ssOut.DataString;
-  finally
-    ssIn.free;
-    dcs.free;
-    ssOut.free;
-  end;
-end;
 
 { TUpdater }
 
@@ -121,43 +97,7 @@ begin
   inherited;
 end;
 
-procedure TUpdater.DownloadUpdates;
-var i:integer;
-    http:TIdHttp;
-    updateinfo:String;
-    data:String;
-begin
-  Log('Downloading updates');
-  forcedirectories(TempPath);
-  http:=nil;
-  updateinfo:='';
-  try
-    http:=TIdHttp.create(nil);
-    http.ConnectTimeout:=1000;
-    for I := 0 to length(FFiles)-1 do
-      begin
-        Log('downloading '+FFiles[i].Url);
-        try
-          data:=http.Get(FFiles[i].Url)
-        except
-          on e:exception do
-           begin
-            LogException(e,'TUpdater.DownloadUpdates http.get('+FFiles[i].Url+')');
-            exit;
-          end;
-         end;
-        if ufCompressed in FFiles[i].Flags
-          then Data:=Decompress(Data);
-        StringToFile(data,TempPath+FFiles[i].Tempname);
-        UpdateInfo:=UpdateInfo+FFiles[i].RealName+#13#10;
-      end;
-    Log('downloads complete');
-    StringToFile(UpdateInfo,TempPath+'UpdateInfo.dat');
-    UpdatesReady:=true;
-  finally
-    http.free;
-  end;
-end;
+
 
 function TUpdater.GetFileCount: integer;
 begin
@@ -174,7 +114,7 @@ end;
 function TUpdater.InstallUpdates:boolean;
 begin
   result:=false;
-  if FileExists(TempPath+'UpdateInfo.dat')
+  if FileExistsUTF8(TempPath+'UpdateInfo.dat') { *Converted from FileExists* }
     then begin
       result:=true;
       ShellExecute(0,'open',PChar(extractfilepath(paramstr(0))+'ChaosUpdater.exe'),PChar('/install "'+paramstr(0)+'" "'+TempPath+'"'),'',sw_normal);

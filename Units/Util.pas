@@ -1,11 +1,14 @@
 unit Util;
+
+{$MODE Delphi}
+
 {*******************************************************************************
 Copyright 2008 MasterOfChaos
 DelphiWinner@gmx.de
 Licence: Completely free
 *******************************************************************************}
 interface
-uses windows,classes;
+uses windows,classes, FileUtil;
 
 //File
 function FileToString(const Filename:String):String;
@@ -149,7 +152,7 @@ begin
      if GetLastError <> ERROR_SUCCESS then exit;
      result:=true;
    finally
-     if hToken<>0 then CloseHandle(hToken);
+     if hToken<>0 then FileClose(hToken); { *Converted from CloseHandle* }
    end;
 end;
 
@@ -215,11 +218,11 @@ end;
 function GetFileSize(const Filename:String):Int64;
 var sr:TSearchRec;
 begin
-  if FindFirst(fileName, faAnyFile, sr )=0 then
+  if FindFirstUTF8(fileName,faAnyFile,sr ) { *Converted from FindFirst* }=0 then
      result:=Int64(sr.FindData.nFileSizeHigh) shl 32+Int64(sr.FindData.nFileSizeLow)
   else
      result := -1;
-  FindClose(sr) ;
+  FindCloseUTF8(sr); { *Converted from FindClose* }
 end;
 
 procedure Str_ClearTo(var S:String;const SubStr:String);
@@ -337,7 +340,7 @@ begin
   i:=Pos(OldPattern,S);
   if i=0//Not found
     then result:=S
-    else result:=copy(s,1,i-1)+NewPattern+copy(s,i+length(oldpattern));
+    else result:=copy(s,1,i-1)+NewPattern+copy(s,i,i+length(oldpattern));
 end;
 
 function Str_ReplaceAll(const S,OldPattern,NewPattern:String):String;
@@ -416,7 +419,7 @@ var IsDebuggerPresent:function():BOOL;stdcall;
 begin
   IsDebuggerPresent:=GetProcAddress(GetModuleHandle('kernel32.dll'),'IsDebuggerPresent');
   result:=assigned(IsDebuggerPresent)and IsDebuggerPresent();
-  result:=result or (DebugHook<>0);
+  //result:=result or (DebugHook<>0);
 end;
 
 function IsKeyPressed(Key:Word):boolean;

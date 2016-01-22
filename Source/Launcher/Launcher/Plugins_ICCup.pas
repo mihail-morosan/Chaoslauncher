@@ -1,10 +1,12 @@
 unit Plugins_ICCup;
 
+{$MODE Delphi}
+
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls,plugins_bwl,util,logger,plugins,idhttp,dcpmd5,update,inifiles,registry,rtlconsts,plugins_bwl4;
+  Dialogs, StdCtrls,Plugins_BWL,Util,logger,Plugins,DCPmd5,Update,inifiles,registry,rtlconsts,Plugins_BWL4;
 
 type
   TICCupConfigForm = class(TForm)
@@ -33,7 +35,6 @@ Type TIccPlugin=class(TBwl4Plugin)
     class function HandlesFile(const Filename,Ext: String):boolean;override;
     procedure ScSuspended;override;
     procedure ShowConfig;override;
-    procedure CheckForUpdates(AUpdater:TUpdater;var desc:String);override;
     constructor Create(const AFilename:String);override;
 end;
 
@@ -49,7 +50,7 @@ end;
 implementation
 uses versions;
 
-{$R *.dfm}
+{$R *.lfm}
 
 const ICCupGatewayName='The Abyss (ICCup)';
       ICCupGatewayServer='sc.theabyss.ru';
@@ -218,38 +219,6 @@ end;
 
 { TIccPlugin }
 
-procedure TIccPlugin.CheckForUpdates(AUpdater: TUpdater; var desc: String);
-var http:TIdHttp;
-    sl:TStringlist;
-    newversion:TVersion;
-begin
-  Log('Update ICCup Antihack');
-  sl:=nil;
-  http:=nil;
-  try
-    http:=TIdHttp.create;
-    http.ConnectTimeout:=2000;
-    sl:=TStringlist.create;
-    try
-      sl.text:=http.get('http://www.iccup.com/launcher/Update.info');
-    except
-      on e:exception do
-      begin
-        LogException(e,'TIccPlugin.CheckForUpdates http.get(Update.info)');
-        exit;
-      end;
-    end;
-    newversion:=ParseVersion(sl.Values['#version']);
-    if CompareVersions(newversion,Version)=0 then exit;
-    Log('Update needed');
-    desc:=desc+#13#10+'ICCup Antihack';
-    desc:=desc+#13#10+VersionToStr(Version)+' -> '+VersionToStr(NewVersion);
-    AUpdater.AddFile(Filename,'http://www.iccup.com/launcher/iccscbn.icc');
-  finally
-    sl.Free;
-    http.Free;
-  end;
-end;
 
 function TIccPlugin.GetCompatible(const Version:TGameVersion):TCompatibility;
 var AVersion:TGameVersion;

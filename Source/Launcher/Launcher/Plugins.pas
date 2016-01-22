@@ -402,7 +402,7 @@ var ProcessInfo:TProcessInformation;
     argsPC:PChar;
 begin
   UpdateScRunning;
-  if GameInfo.Running then raise exception.create(GameName+' is already running');
+  if (GameInfo.Running)and(not settings.AllowMultiInstance) then raise exception.create(GameName+' is already running');
   if (AProcessID=0)and(GameFindProcessID<>0)and(not settings.AllowMultiInstance)
     then begin
       if(MessageDlg('An external instance of'+GameName+' is already running',

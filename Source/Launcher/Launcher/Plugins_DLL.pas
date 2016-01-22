@@ -1,7 +1,9 @@
 unit Plugins_DLL;
 
+{$MODE Delphi}
+
 interface
-uses windows,sysutils,classes,util,plugins,update,inifiles;
+uses windows,sysutils,classes,Util,Plugins,Update,inifiles;
 Type TInjPlugin=class(TPlugin)
   protected
     FScVersion:String;

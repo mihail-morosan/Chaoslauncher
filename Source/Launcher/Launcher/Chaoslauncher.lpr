@@ -1,10 +1,12 @@
 program Chaoslauncher;
 
+{$MODE Delphi}
+
 uses
   windows,
   shellapi,
   sysutils,
-  Forms,
+  Forms, Interfaces,
   logger,
   Main in 'Main.pas' {ChaoslauncherForm},
   Plugins in 'Plugins.pas',

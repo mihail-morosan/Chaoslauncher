@@ -1,7 +1,9 @@
 unit Config;
 
+{$MODE Delphi}
+
 interface
-uses windows,inifiles,registry,launcher_game;
+uses windows,inifiles,registry,Launcher_Game;
 
 Type TSettings=record
       StartMinimized:boolean;

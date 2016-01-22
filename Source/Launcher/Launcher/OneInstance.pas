@@ -1,7 +1,9 @@
 unit OneInstance;
 
+{$MODE Delphi}
+
 interface
-uses windows,messages;
+uses windows,messages, SysUtils;
 
 var IsFirstInstance:boolean;
 procedure ActivateOldInstance;
@@ -41,7 +43,7 @@ var Mutex:THandle;
 
 procedure InstanceEnded;
 begin
-  if Mutex<>0 then CloseHandle(Mutex);
+  if Mutex<>0 then FileClose(Mutex); { *Converted from CloseHandle* }
   Mutex:=0;
 end;
 

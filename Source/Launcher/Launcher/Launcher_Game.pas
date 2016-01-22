@@ -1,6 +1,10 @@
 unit Launcher_Game;
 
+{$MODE Delphi}
+
 interface
+
+uses FileUtil;
 
 const GameName='Starcraft';
       GameShortName='SC';
@@ -11,7 +15,7 @@ function GameFindProcessID:Cardinal;
 procedure GameListVersions;
 
 implementation
-uses windows,sysutils,registry,plugins,versions,util;
+uses windows,sysutils,registry,Plugins,versions,Util;
 
 var FGamePath:String;
 
@@ -23,22 +27,23 @@ end;
 procedure UpdateGamePath;
 var reg:TRegistry;
 begin
-  reg:=nil;
-  try
-    reg:=TRegistry.create;
-    reg.RootKey:=HKEY_CURRENT_USER;
-    reg.OpenKeyReadOnly('SOFTWARE\Blizzard Entertainment\Starcraft');
-    FGamePath:=reg.ReadString('InstallPath');
-    if FGamePath = ''
-      then begin
-        reg.RootKey:=HKEY_LOCAL_MACHINE;
-        reg.OpenKeyReadOnly('SOFTWARE\Blizzard Entertainment\Starcraft');
-        FGamePath:=reg.ReadString('InstallPath');
-      end;
-   FGamePath:=FGamePath+'\';
-  finally
-    reg.free;
-  end;
+  //reg:=nil;
+  //try
+  //  reg:=TRegistry.create;
+  //  reg.RootKey:=HKEY_CURRENT_USER;
+  //  reg.OpenKeyReadOnly('SOFTWARE\Blizzard Entertainment\Starcraft');
+  //  FGamePath:=reg.ReadString('InstallPath');
+  //  if FGamePath = ''
+  //    then begin
+  //      reg.RootKey:=HKEY_LOCAL_MACHINE;
+  //      reg.OpenKeyReadOnly('SOFTWARE\Blizzard Entertainment\Starcraft');
+  //      FGamePath:=reg.ReadString('InstallPath');
+  //    end;
+  // FGamePath:=FGamePath+'\';
+  //finally
+  //  reg.free;
+  //end;
+  FGamePath:='E:\Games\Starcraft\';
 end;
 
 procedure SetGamePath(NewPath:String);
@@ -78,7 +83,7 @@ var error:integer;
     SRec:TSearchRec;
     GameVersion:TGameVersion;
 begin
-  error:=FindFirst(GamePath+'Starcraft*.exe',faAnyFile and not faDirectory,SRec);
+  error:=FindFirstUTF8(GamePath+'Starcraft*.exe',faAnyFile and not faDirectory,SRec); { *Converted from FindFirst* }
   while error=0 do
    begin
     GameVersion.Filename:=GamePath+SRec.Name;
@@ -87,7 +92,7 @@ begin
     GameVersion.Name:='Starcraft '+GameVersion.Version;
     GameVersion.Ladder:=nil;
     AddGameVersion(GameVersion);
-    error:=FindNext(SRec);
+    error:=FindNextUTF8(SRec); { *Converted from FindNext* }
    end;
   if (Error<>ERROR_NO_MORE_FILES)and(Error<>ERROR_FILE_NOT_FOUND)and(Error<>ERROR_PATH_NOT_FOUND)
     then MessageBox(0,PChar('Search for Game executables failed '+GetErrorString(Error)), 'Error', MB_OK + MB_ICONSTOP);

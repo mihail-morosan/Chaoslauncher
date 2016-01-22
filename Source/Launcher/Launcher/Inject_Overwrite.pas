@@ -1,7 +1,9 @@
 unit Inject_Overwrite;
 
+{$MODE Delphi}
+
 interface
-uses windows,util,logger,classes,sysutils,streaming;
+uses windows,Util,logger,classes,sysutils,streaming;
 
 procedure InjectOverwrite(hProcess:THandle;const ScCode:String;const InjectHelper:String;const UserData:String);
 

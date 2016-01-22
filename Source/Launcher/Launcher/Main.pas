@@ -1,11 +1,14 @@
 unit Main;
 
+{$MODE Delphi}
+
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, Menus, ExtCtrls, StdCtrls, CheckLst, ComCtrls,XPMan, ImgList,registry,
-  Buttons,math,shellapi,OneInstance,update,idhttp, OleCtrls, SHDocVW,Launcher_Game;
+  Dialogs, Menus, ExtCtrls, StdCtrls, CheckLst, ComCtrls, ImgList,
+  registry, Buttons, FileUtil, math, shellapi, OneInstance, Update,
+  Launcher_Game;
 
 type
   TChaoslauncherForm = class(TForm)
@@ -17,11 +20,6 @@ type
     Pluginlist: TCheckListBox;
     Pluginname: TLabel;
     Plugindescription: TMemo;
-    TrayIcon1: TTrayIcon;
-    TrayMenu: TPopupMenu;
-    RunSC1: TMenuItem;
-    Config1: TMenuItem;
-    Exit1: TMenuItem;
     PluginVersion: TLabel;
     PluginStatusImgs12: TImageList;
     RunIfIncompatible: TCheckBox;
@@ -32,22 +30,7 @@ type
     BanDanger: TLabel;
     PluginAuthor: TLabel;
     Config: TButton;
-    ToolTab: TTabSheet;
-    ToolList: TListBox;
-    ToolOK: TButton;
-    ToolCancel: TButton;
-    RunScVersion1: TMenuItem;
-    N2: TMenuItem;
-    Label1: TLabel;
-    Toolname: TEdit;
-    Label2: TLabel;
-    ToolPath: TEdit;
     ToolOpenDialog: TOpenDialog;
-    ToolBrowse: TBitBtn;
-    ToolDelete: TButton;
-    Label3: TLabel;
-    ToolParams: TEdit;
-    N1: TMenuItem;
     SettingsTab: TTabSheet;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
@@ -59,35 +42,13 @@ type
     RunScOnStartup: TCheckBox;
     Label6: TLabel;
     InjectionMethod: TComboBox;
-    AboutTap: TTabSheet;
-    About_Name: TLabel;
-    About_By: TLabel;
-    Image1: TImage;
-    About_Website: TLabel;
     SettingsOK: TButton;
     SettingsCancel: TButton;
-    Update: TButton;
-    TvAnts1: TMenuItem;
-    GetTvAnts1: TMenuItem;
-    N3: TMenuItem;
     Autoupdate: TCheckBox;
     StartupTimer: TTimer;
     Diagnose: TButton;
-    Streams1: TMenuItem;
-    GomTVClassic1: TMenuItem;
-    Attach1: TMenuItem;
-    RunLadder1: TMenuItem;
     WarnNoAdmin: TCheckBox;
-    News: TTabSheet;
-    Panel2: TPanel;
-    News_Chaos: TImage;
-    News_GGNet: TImage;
     Help: TButton;
-    News_TL: TImage;
-    Tools1: TMenuItem;
-    Calendar: TTabSheet;
-    Cal_Events: TListBox;
-    Cal_Description: TMemo;
     BrowseInstallPath: TButton;
     PathOpenDialog: TOpenDialog;
     ScPort: TComboBox;
@@ -109,14 +70,9 @@ type
     procedure StartLatestSC(Sender: TObject);
     procedure StartScVersion(Sender: TObject);
     procedure PageControl1Changing(Sender: TObject; var AllowChange: Boolean);
-    procedure ToolsChange(Sender: TObject);
-    procedure ToolCancelClick(Sender: TObject);
-    procedure ToolOKClick(Sender: TObject);
-    procedure ToolDeleteClick(Sender: TObject);
-    procedure ToolListClick(Sender: TObject);
+
     procedure PageControl1Change(Sender: TObject);
-    procedure ToolBrowseClick(Sender: TObject);
-    procedure UpdateToolList(Sender: TObject);
+
     procedure RunTool(Sender: TObject);
     procedure SettingsChange(Sender: TObject);
     procedure LoadSettings(Sender: TObject);
@@ -127,21 +83,15 @@ type
     procedure AppMinimize(Sender: TObject);
     procedure AppRestore(Sender: TObject);
     procedure GetScVersions(Sender: TObject);
-    procedure GetTvAntsList(Sender: TObject);
     procedure RunTvAnts(Sender: TObject);
     procedure GetTvAnts1Click(Sender: TObject);
-    procedure UpdateClick(Sender: TObject);
     procedure StartupTimerTimer(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure DiagnoseClick(Sender: TObject);
-    procedure GomTVClassic1Click(Sender: TObject);
-    procedure TrayMenuPopup(Sender: TObject);
     procedure Attach1Click(Sender: TObject);
-    procedure NewsShow(Sender: TObject);
     procedure News_ChaosClick(Sender: TObject);
     procedure News_GGNetClick(Sender: TObject);
     procedure HelpClick(Sender: TObject);
-    procedure NewsHide(Sender: TObject);
     procedure News_TLClick(Sender: TObject);
     procedure BrowseInstallPathClick(Sender: TObject);
   private
@@ -159,7 +109,7 @@ implementation
 
 uses Util, logger, Plugins, Tools, TvAnts, Plugins_BWL, Config,versions;
 
-{$R *.dfm}
+{$R *.lfm}
 const LauncherUpdateUrl='http://winner.cspsx.de/Starcraft/Tool/Launcherupdate/';
 var CurrentVersion:integer=-1;
     ToolsChanged:boolean=false;
@@ -304,38 +254,7 @@ begin
   SettingsCancel.Enabled:=false;
 end;
 
-var NewsBrowser:TWebBrowser;
-procedure InitNewsBrowser;
-begin
-  if NewsBrowser<>nil then exit;
-  NewsBrowser:=  TWebBrowser.create(Chaoslauncherform.News);
-  TControl(NewsBrowser).Parent:=TWinControl(TControl(NewsBrowser).Owner);
-  NewsBrowser.Align:=alClient;
-  ChaoslauncherForm.News_ChaosClick(nil);
-end;
 
-procedure ShowNews(AUrl:String);
-begin
-  if NewsBrowser=nil then exit;
-  //WebBrowserControl ignores navNoReadFromCache flag
-  //use unique url to fix that
-  if pos('?',AUrl)>0
-   then AUrl:=AUrl+'&'
-   else AUrl:=AUrl+'?';
-  AUrl:=AUrl+'nocache='+inttohex(random(high(integer)),8);
-  NewsBrowser.Navigate(aurl,navNoReadFromCache or navNoWriteToCache);
-end;
-
-procedure TChaoslauncherForm.NewsHide(Sender: TObject);
-begin
-  if NewsBrowser=nil then exit;
-  FreeAndNil(NewsBrowser);
-end;
-
-procedure TChaoslauncherForm.NewsShow(Sender: TObject);
-begin
-  InitNewsBrowser;
-end;
 
 //######## Update ########
 
@@ -344,75 +263,32 @@ Type TLauncherUpdateModule=class(TUpdateModule)
     procedure CheckForUpdates(var desc:String);override;
 end;
 
-procedure TChaoslauncherForm.UpdateClick(Sender: TObject);
-var Desc:String;
-begin
-  try
-    Update.Enabled:=false;
-    Update.Caption:='Checking...';
-    application.ProcessMessages;
-    Log('Check for updates');
-    if not Updater.CheckForUpdates(Desc)
-      then begin
-        Log('No updates available');
-        exit;
-      end;
-    Log('Updates available');
-    if MessageDlg('The following updates are available:'#13#10+
-                  Desc+#13#10#13#10+
-                  'Do you want to download and install them?',
-               mtConfirmation,
-               [mbYes,mbNo],
-               0)<>mrYes
-      then exit;
-    Update.Caption:='Downloading...';
-    application.ProcessMessages;
-    Log('Download updates');
-    Updater.DownloadUpdates;
-    Log('Download complete');
-    application.ProcessMessages;
-    RestartLauncher:=true;
-    if MessageDlg('Updates downloaded. You need to restart the launcher to install them.'#13#10
-               +'Restart now?',
-               mtConfirmation,
-               [mbYes,mbNo],
-               0)=mrYes
-       then close
-       else RestartLauncher:=false;
-  finally
-    Update.Enabled:=true;
-    Update.Caption:='Update';
-  end;
-end;
-
 { TLauncherUpdateModule }
 
 procedure TLauncherUpdateModule.CheckForUpdates(var desc:String);
 begin
   inherited;
   Log('Updateing Launcher');
-  BwlUpdateCheck(Updater,LauncherUpdateUrl,paramstr(0),desc,'Chaoslauncher');
 end;
 
 //######## SimpleGUI ########
 
 procedure TChaoslauncherForm.About_WebsiteClick(Sender: TObject);
 begin
- shellexecute(0,'open','http://winner.cspsx.de/Starcraft','','',SW_SHOW);
 end;
 
 procedure TChaoslauncherForm.AppMinimize(Sender: TObject);
 begin
   ChaoslauncherForm.Hide;
-  ShowWindow(Application.Handle, SW_HIDE);
+  //ShowWindow(Application.Handle, SW_HIDE);
 end;
 
 procedure TChaoslauncherForm.AppRestore(Sender: TObject);
 begin
-  if IsIconic(Application.Handle) then
-    Application.Restore;
+  //if IsIconic(Application.Handle) then
+  //  Application.Restore;
   ChaoslauncherForm.Show;
-  ShowWindow(Application.Handle, SW_SHOW);
+  //ShowWindow(Application.Handle, SW_SHOW);
   Application.BringToFront;
 end;
 
@@ -439,54 +315,28 @@ begin
   Log('Finishing');
 end;
 
-procedure TChaoslauncherForm.GomTVClassic1Click(Sender: TObject);
-var s:String;
-    http:TIdHttp;
-    i:integer;
-begin
-  http:=nil;
-  try
-    http:=TIdHttp.Create(nil);
-    s:=http.get('http://www.gomtv.net/classic/live/');
-    i:=pos('<div class="livepage_view">',s);
-    if i=0 then raise exception.create('Parse Error');
-    delete(s,1,i);
-    i:=pos('<a href="',s);
-    if i=0 then raise exception.create('Parse Error');
-    delete(s,1,i+8);
-    i:=pos('"',s);
-    if i=0 then raise exception.create('Parse Error');
-    s:=copy(s,1,i-1);
-    showmessage(S);
-  finally
-    http.free;
-  end;
-end;
 
 procedure TChaoslauncherForm.HelpClick(Sender: TObject);
 var Filename:String;
 begin
   Filename:='';
-  if FileExists(Changefileext(plugindata[pluginlist.ItemIndex].Filename,'.txt'))
+  if FileExistsUTF8(Changefileext(plugindata[pluginlist.ItemIndex].Filename,'.txt')) { *Converted from FileExists* }
     then Filename:=Changefileext(plugindata[pluginlist.ItemIndex].Filename,'.txt');
-  if FileExists(Changefileext(plugindata[pluginlist.ItemIndex].Filename,'Readme.txt'))
+  if FileExistsUTF8(Changefileext(plugindata[pluginlist.ItemIndex].Filename,'Readme.txt')) { *Converted from FileExists* }
     then Filename:=Changefileext(plugindata[pluginlist.ItemIndex].Filename,'Readme.txt');
   if Filename<>'' then ShellExecute(0,'open',PChar(Filename),nil,nil,sw_normal);
 end;
 
 procedure TChaoslauncherForm.News_ChaosClick(Sender: TObject);
 begin
-  ShowNews('http://winner.cspsx.de/Starcraft/ChaosNews.php');
 end;
 
 procedure TChaoslauncherForm.News_GGNetClick(Sender: TObject);
 begin
-  ShowNews('http://sc.gosugamers.net/index.php?small_news=1');
 end;
 
 procedure TChaoslauncherForm.News_TLClick(Sender: TObject);
 begin
-  ShowNews('http://www.teamliquid.net/index.php?small_news=1');
 end;
 
 procedure TChaoslauncherForm.DiagnoseClick(Sender: TObject);
@@ -497,10 +347,10 @@ begin
              'Some plugins might not work correctly or cause errors'#13#10+
              'You need to be admin and if you are using vista you have to set the adminflag in the properties of Chaoslauncher.exe'#13#10+
              GetLastErrorString);
-  if not fileexists(GamePath+'Starcraft.exe')
+  if not FileExistsUTF8(GamePath+'Starcraft.exe') { *Converted from FileExists* }
     then showmessage('Incorrect path to starcraft'#13#10+
                      'Change it in the right column of the settings-tab');
-  if lowercase(copy(GamePath,length(GamePath)-4))='.exe\' then
+  if lowercase(copy(GamePath,length(GamePath)-4,4))='.exe\' then
     showmessage('don''t include the name of the executable in the path');
 end;
 
@@ -514,17 +364,12 @@ begin
   TvAntsData[(Sender as TComponent).tag].Run;
 end;
 
-procedure TChaoslauncherForm.TrayMenuPopup(Sender: TObject);
-begin
-  UpdateSCRunning;
-  Attach1.visible:=(not GameInfo.Running)and(FindWindow('SWarClass',nil)<>0);
-  Attach1.Caption:='Attach to '+VersionData[CurrentVersion].Name;
-end;
+
 
 procedure TChaoslauncherForm.GetTvAnts1Click(Sender: TObject);
 var error:integer;
 begin
-  error:=shellexecute(0,'open','http://www.tvants.com/download/tvantssetup.exe','','',SW_Normal);
+  //error:=shellexecute(0,'open','http://www.tvants.com/download/tvantssetup.exe','','',SW_Normal);
   if error<=32 then raise exception.create('Error starting TvAnts '+inttostr(error));  
 end;
 
@@ -590,43 +435,29 @@ var i:integer;
 begin
   GetGameVersions(GamePath);
   Versions.items.clear;
-  RunScVersion1.Clear;
-  RunLadder1.Clear;
+  //RunScVersion1.Clear;
+  //RunLadder1.Clear;
   for i := 0 to length(VersionData)-1 do
     begin
       Versions.Items.Add(VersionData[i].Name);
-      MenuItem:=TMenuItem.Create(RunScVersion1);
-      MenuItem.Caption:=versions.Items[i];
-      MenuItem.Tag:=i;
-      MenuItem.OnClick:=StartScVersion;
-      if VersionData[i].Ladder<>nil
-        then RunLadder1.Add(MenuItem)
-        else RunScVersion1.Add(MenuItem);
+      //MenuItem:=TMenuItem.Create(RunScVersion1);
+      //MenuItem.Caption:=versions.Items[i];
+      //MenuItem.Tag:=i;
+      //MenuItem.OnClick:=StartScVersion;
+      //if VersionData[i].Ladder<>nil
+      //  then RunLadder1.Add(MenuItem)
+      //  else RunScVersion1.Add(MenuItem);
     end;
   CurrentVersion:=-1;
   CurrentVersion:=Versions.Items.IndexOf(LoadVersion);
   Versions.ItemIndex:=CurrentVersion;
   if Versions.ItemIndex<0
     then Versions.ItemIndex:=LatestVersion;
-  if LatestVersion>=0
-    then RunSc1.caption:='&Run '+stringreplace(VersionData[LatestVersion].Name,GameName,GameShortName,[rfReplaceAll]);
+  //if LatestVersion>=0
+  //  then RunSc1.caption:='&Run '+stringreplace(VersionData[LatestVersion].Name,GameName,GameShortName,[rfReplaceAll]);
   VersionsChange(Sender);
 end;
 
-procedure TChaoslauncherForm.GetTvAntsList(Sender: TObject);
-var i:integer;
-    MenuItem:TMenuItem;
-begin
-  for i := 0 to length(TvAntsData) - 1 do
-   begin
-     MenuItem:=TMenuItem.create(TvAnts1);
-     MenuItem.Name:='TvAnts'+inttostr(i);
-     MenuItem.Caption:=TvAntsData[i].Name;
-     MenuItem.tag:=i;
-     MenuItem.OnClick:=RunTvAnts;
-     TvAnts1.Insert(i,MenuItem);
-   end;
-end;
 
 procedure TChaoslauncherForm.FormCreate(Sender: TObject);
 var   i,j:integer;
@@ -657,8 +488,7 @@ begin
   PluginStatus.caption:='';
   BanDanger.Caption:='';
   Config.enabled:=false;
-  UpdateToolList(sender);
-  ToolList.ItemIndex:=0;
+  //ToolList.ItemIndex:=0;
   TLauncherUpdateModule.create(Updater);
   Pluginlist.items.clear;
   for i := 0 to length(PluginData)-1 do
@@ -682,18 +512,17 @@ begin
   GetScVersions(Sender);
   PluginListClick(Sender);
   UpdatePluginList(sender);
-  GetTvAntsList(sender);
-  About_Name.caption:=stringreplace('Chaoslauncher Version %1','%1',VersionToStr(GetProgramVersion),[rfReplaceAll]);
+  //About_Name.caption:=stringreplace('Chaoslauncher Version %1','%1',VersionToStr(GetProgramVersion),[rfReplaceAll]);
   LoadSize;
   Application.ShowMainForm:=false;
   visible:=not Settings.StartMinimized;
   if Settings.StartMinimized
     then Application.Minimize
     else Show;
-  if not fileexists(GamePath+'Starcraft.exe')
+  if not FileExistsUTF8(GamePath+'Starcraft.exe') { *Converted from FileExists* }
     then showmessage('Incorrect path to starcraft'#13#10+
                      'Change it in the right column of the settings-tab');
-  if lowercase(copy(GamePath,length(GamePath)-4))='.exe\' then
+  if lowercase(copy(GamePath,length(GamePath)-4,4))='.exe\' then
     showmessage('don''t include the name of the executable in the path');
   Log('Init complete');
   StartupTimer.enabled:=true;
@@ -743,8 +572,8 @@ begin
   Config.Enabled:=plugindata[pluginlist.ItemIndex].HasConfig;
 
   Help.Enabled:=
-        FileExists(Changefileext(plugindata[pluginlist.ItemIndex].Filename,'.txt'))
-     or FileExists(Changefileext(plugindata[pluginlist.ItemIndex].Filename,'Readme.txt'));
+        FileExistsUTF8(Changefileext(plugindata[pluginlist.ItemIndex].Filename,'.txt')) { *Converted from FileExists* }
+     or FileExistsUTF8(Changefileext(plugindata[pluginlist.ItemIndex].Filename,'Readme.txt')); { *Converted from FileExists* }
 
   //Pluginstate
   SetRunIfIncompatible(plugindata[pluginlist.ItemIndex].RunIncompatible);
@@ -793,7 +622,8 @@ begin
   PluginList.Canvas.FillRect(Rect);
   if Index < PluginList.Count then
     begin
-      Flags := DrawTextBiDiModeFlags(DT_SINGLELINE or DT_VCENTER or DT_NOPREFIX);
+      //DrawTextBiDiModeFlags(
+      Flags := DT_SINGLELINE or DT_VCENTER or DT_NOPREFIX;
       if not UseRightToLeftAlignment then
         Inc(Rect.Left, 2)
       else
@@ -820,122 +650,7 @@ end;
 
 //######## Tools ########
 
-procedure TChaoslauncherForm.ToolBrowseClick(Sender: TObject);
-begin
-  toolopendialog.filename:=toolpath.text;
-  if not toolopendialog.execute then exit;
-  toolpath.text:=toolopendialog.filename;
-end;
 
-procedure TChaoslauncherForm.ToolCancelClick(Sender: TObject);
-begin
-  ToolsChanged:=false;
-  ToolListClick(sender);
-end;
-
-procedure TChaoslauncherForm.ToolDeleteClick(Sender: TObject);
-var i:integer;
-begin
-  if messagedlg(format('Do you really want to delete %s',[ToolData[ToolList.itemindex].Name]),
-    mtConfirmation,[mbYes,mbNo],0)<>mrYes
-    then exit;
-  ToolData[ToolList.itemindex].free;
-  for i:= ToolList.itemindex to length(ToolData)-2 do
-    ToolData[i]:=ToolData[i+1];
-  setlength(ToolData,length(ToolData)-1);
-  SaveTools;
-  ToolsChanged:=false;
-  UpdateToolList(Sender);
-  CurrentToolIndex:=-1;
-  ToolListClick(sender);
-end;
-
-procedure TChaoslauncherForm.ToolListClick(Sender: TObject);
-begin
-  if Toollist.itemindex<0
-   then begin
-     Toollist.ItemIndex:=0;
-     exit;
-   end;
-  //if CurrentToolIndex=Toollist.itemindex then exit;
-  if ToolsChanged
-   then begin
-     messagedlg('Cannot swich tool while editing a tool',mtWarning,[mbOk],0);
-     Toollist.itemindex:=CurrentToolIndex;
-     exit;
-   end;
-  CurrentToolIndex:=Toollist.itemindex;
-  if Toollist.itemindex<length(ToolData)
-   then begin
-    ToolName.Text:=ToolData[Toollist.itemindex].Name;
-    ToolPath.Text:=ToolData[Toollist.itemindex].Path;
-    ToolParams.Text:=ToolData[Toollist.itemindex].Params;
-   end
-   else begin
-    ToolName.Text:='New Tool';
-    ToolPath.Text:='';
-    ToolParams.Text:='';
-   end;
-  tooldelete.enabled:=Toollist.itemindex<Toollist.items.count-1;
-  ToolOk.Enabled:=false;
-  ToolCancel.Enabled:=false;
-  ToolsChanged:=false;
-end;
-
-procedure TChaoslauncherForm.UpdateToolList(Sender: TObject);
-var i:integer;
-    //pos:integer;
-    MenuItem:TMenuItem;
-begin
-  Toollist.items.clear;
-  for i := 0 to length(ToolData)-1 do
-    Toollist.Items.Add(Tooldata[i].Name);
-
-  {
-  for i := Traymenu.Items.count-1 downto 0 do
-    if copy(Traymenu.Items[i].Name,1,4)='Tool' then Traymenu.Items[i].free;
-  pos:=TrayMenu.Items.IndexOf(N1)+1;
-  }
-  Tools1.clear;
-
-  for i := 0 to length(ToolData)-1 do
-    begin
-      MenuItem:=TMenuItem.create(TrayMenu);
-      MenuItem.name:='Tool'+inttostr(i);
-      MenuItem.Caption:=ToolData[i].Name;
-      MenuItem.Tag:=i;
-      MenuItem.OnClick:=RunTool;
-      Tools1.Add(MenuItem);
-      //Traymenu.Items.Insert(pos,MenuItem);
-      //inc(pos);
-    end;
-  Toollist.items.add('New Tool');
-  ToollistClick(sender);
-end;
-
-procedure TChaoslauncherForm.ToolOKClick(Sender: TObject);
-begin
-  if CurrentToolIndex>=length(Tooldata)
-   then begin
-     setlength(ToolData,CurrentToolIndex+1);
-     ToolData[CurrentToolIndex]:=TTool.create;
-   end;                                       
-  ToolData[CurrentToolIndex].Name:=ToolName.Text;
-  ToolData[CurrentToolIndex].Path:=ToolPath.Text;
-  ToolData[CurrentToolIndex].Params:=ToolParams.Text;
-  SaveTools;
-  CurrentToolIndex:=-1;
-  UpdateToolList(Sender);
-  ToolsChanged:=false;
-  ToolListClick(sender);
-end;
-
-procedure TChaoslauncherForm.ToolsChange(Sender: TObject);
-begin
-  ToolsChanged:=true;
-  ToolOk.enabled:=true;
-  ToolCancel.Enabled:=true;
-end;
 
 //######## Misc ########
 
@@ -958,11 +673,12 @@ begin
      CanClose:=false;
      messagedlg('Cannot close while Starcraft is running',mtWarning,[mbOk],0);
    end;
+   Application.Terminate;
 end;
 
 procedure TChaoslauncherForm.PageControl1Change(Sender: TObject);
 begin
-  ToolListClick(sender);
+
 end;
 
 procedure TChaoslauncherForm.PageControl1Changing(Sender: TObject;
@@ -1000,7 +716,6 @@ end;
 procedure TChaoslauncherForm.StartupTimerTimer(Sender: TObject);
 begin
   StartupTimer.Enabled:=false;
-  if Settings.Autoupdate then UpdateClick(Sender);
   if Settings.RunScOnStartup
    then begin
      Log('Run Starcraft on startup');

@@ -31,6 +31,9 @@
 {$I LockBox.inc}
 
 unit LbRSA;
+
+{$MODE Delphi}
+
   {-RSA encryption and signature components, classes, and routines}
 
 interface

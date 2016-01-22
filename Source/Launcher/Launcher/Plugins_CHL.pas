@@ -1,7 +1,9 @@
 unit Plugins_CHL;
 
+{$MODE Delphi}
+
 interface
-uses windows,classes,sysutils,update,plugins,versions,util,logger,config;
+uses windows,classes,sysutils,Update,Plugins,versions,Util,logger,Config;
 
 
 Type TChlPlugin=class(TPlugin)

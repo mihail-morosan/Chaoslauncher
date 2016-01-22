@@ -1,10 +1,13 @@
 unit Plugins_AdvLoader;
 
+{$MODE Delphi}
+
 interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs,update,plugins, ExtCtrls,StdCtrls,inifiles,spin,registry,util,filectrl,Launcher_Game;
+  Dialogs, Update, Plugins, ExtCtrls, StdCtrls, inifiles, spin, registry, Util,
+  filectrl, FileUtil, Launcher_Game;
 
 Type
 TAdvLoaderConfig=class;
@@ -72,8 +75,8 @@ function AdvPluginPath:String;
 function AdvPath:String;
 
 implementation
-uses config,inject_remotethread,versions;
-{$R *.dfm}
+uses Config,Inject_RemoteThread,versions;
+{$R *.lfm}
 
 type TAdvPluginInfo=packed record
   Lang:PChar;
@@ -154,11 +157,11 @@ begin
   try
     BackupList:=GetAdvPluginList;
     S:=Backuplist;
-    Error:=FindFirst(AdvPluginPath+'*.bwl',faAnyfile and not faDirectory,SRec);
+    Error:=FindFirstUTF8(AdvPluginPath+'*.bwl',faAnyfile and not faDirectory,SRec); { *Converted from FindFirst* }
     while Error=0 do
     begin
       AdvPluginListAdd(S,SRec.Name);
-      Error:=FindNext(SRec);
+      Error:=FindNextUTF8(SRec); { *Converted from FindNext* }
     end;
     if (Error<>ERROR_NO_MORE_FILES)and(Error<>ERROR_FILE_NOT_FOUND)
       then raise exception.create('Search for AdvLoader .bwl plugins failed '+GetErrorString(Error));
@@ -200,7 +203,7 @@ constructor TAdvLoaderPlugin.Create(const AFilename: String);
 begin
   inherited;
   FName:=stringreplace(changefileext(Extractfilename(AFilename),''),'_',' ',[rfReplaceAll]);
-  FHasConfig:=fileexists(Configfile)and (GetFileSize(Configfile)>0);
+  FHasConfig:=FileExistsUTF8(Configfile) { *Converted from FileExists* }and (FileSize(Configfile) { *Converted from GetFileSize* }>0);
 end;
 
 procedure TAdvLoaderPlugin.LoadEnabled;
@@ -445,7 +448,7 @@ procedure TAdvLoaderFilenameProperty.ShowDirectoryDialog(Sender: TObject);
 var dir:String;
 begin
   dir:=edit.text;
-  if SelectDirectory(Desc,'',dir,[sdNewUI])
+  if SelectDirectory(Desc,'',dir)
     then edit.text:=dir;
 end;
 
@@ -593,7 +596,7 @@ end;
 class function TAdvLoaderPlugin1.HandlesFile(const Filename,
   Ext: String): boolean;
 begin
-  result:=(ext='.bwp')and not(directoryexists(AdvPluginPath+'Options'));
+  result:=(ext='.bwp')and not(DirectoryExistsUTF8(AdvPluginPath+'Options') { *Converted from DirectoryExists* });
 end;
 
 { TAdvLoaderPlugin2 }
@@ -656,7 +659,7 @@ end;
 class function TAdvLoaderPlugin2.HandlesFile(const Filename,
   Ext: String): boolean;
 begin
-  result:=(ext='.bwp')and(directoryexists(AdvPluginPath+'Options'));
+  result:=(ext='.bwp')and(DirectoryExistsUTF8(AdvPluginPath+'Options') { *Converted from DirectoryExists* });
 end;
 
 begin

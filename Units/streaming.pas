@@ -1,5 +1,7 @@
 unit streaming;
 
+{$MODE Delphi}
+
 interface
 uses classes,sysutils;
 Type EStreamAccess=class(Exception);

@@ -31,6 +31,9 @@
 {$I LockBox.inc}
 
 unit LbAsym;
+
+{$MODE Delphi}
+
   {-Asymmetric key encryption classes}
 
 interface

@@ -1,5 +1,7 @@
 unit CHL_Helper;
 
+{$MODE Delphi}
+
 interface
 uses versions;
 

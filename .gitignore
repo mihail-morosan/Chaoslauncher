@@ -1,5 +1,7 @@
 /Private/
 /StarcraftTools/
+/Source/Launcher/Launcher/Build/
+/Source/Launcher/Launcher/lib/
 
 *.dcu
 *.~*
@@ -15,3 +17,4 @@
 __log.txt
 Thumbs.db
 .svn
+*.lps

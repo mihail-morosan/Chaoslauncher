@@ -1,5 +1,7 @@
 unit versions;
 
+{$MODE Delphi}
+
 interface
 
 type TVersion=packed array[0..3]of Word;
@@ -14,7 +16,7 @@ function GetModuleVersion:TVersion;
 function GetProgramVersion:TVersion;
 
 implementation
-uses windows,sysutils,util;
+uses windows,sysutils,Util;
 
 function ParseVersion(VersionStr:String):TVersion;
   function PopInteger(var S:String):integer;

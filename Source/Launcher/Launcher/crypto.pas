@@ -1,5 +1,7 @@
 unit crypto;
 
+{$MODE Delphi}
+
 interface
 
 function BufferToHex(const Buffer;Size:integer):String;
@@ -10,7 +12,7 @@ function RsaSign(const S,PrivateKey:String):String;
 function RsaVerify(const S,PublicKey,Signature:String):boolean;
 
 implementation
-uses sysutils,dcpmd5,dcpsha1,LbRSA,LbAsym;
+uses sysutils,DCPmd5,DCPsha1,LbRSA,LbAsym;
 
 function BufferToHex(const Buffer;Size:integer):String;
 var i:integer;
@@ -73,7 +75,7 @@ begin
     sig.HashMethod:=hmSha1;
     sig.KeySize:=aks1024;
     sig.PrivateKey.ExponentAsString:=copy(PrivateKey,1,i-1);
-    sig.PrivateKey.ModulusAsString:=copy(PrivateKey,i+1);
+    sig.PrivateKey.ModulusAsString:=copy(PrivateKey,i+1,i+length(PrivateKey));
     sig.SignString(S);
     result:=sig.Signature.IntStr;
   finally
@@ -95,7 +97,7 @@ begin
     sig.HashMethod:=hmSha1;
     sig.KeySize:=aks1024;
     sig.PublicKey.ExponentAsString:=copy(PublicKey,1,i-1);
-    sig.PublicKey.ModulusAsString:=copy(PublicKey,i+1);
+    sig.PublicKey.ModulusAsString:=copy(PublicKey,i+1,i+length(PublicKey));
     if odd(length(Signature)) then raise exception.create('Odd hexsignature string');
     setlength(SigBuf,length(Signature)div 2);
     HexToBuffer(Signature,SigBuf[1],length(SigBuf));

@@ -1,11 +1,13 @@
 unit Inject_RemoteThread;
 
+{$MODE Delphi}
+
 interface
 
 procedure InjectDll_RemoteThread(hProcess:THandle;DllFileName:String);
 
 implementation
-uses windows,classes,sysutils,util,logger;
+uses windows,classes,sysutils,Util,logger;
 
 procedure InjectDll_RemoteThread(hProcess:THandle;DllFileName:String);
 var hThread:THandle;
@@ -39,7 +41,7 @@ begin
     if(ExitCode=0)then raise exception.create('Remote LoadLibrary failed');
   finally
     VirtualFreeEx(hProcess, PathAddress, length(DllFileName)+1, MEM_RELEASE);
-    closeHandle(hThread);
+    FileClose(hThread); { *Converted from CloseHandle* }
   end;
 end;
 

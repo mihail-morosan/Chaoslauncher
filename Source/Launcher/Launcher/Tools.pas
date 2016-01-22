@@ -1,7 +1,9 @@
 unit Tools;
 
+{$MODE Delphi}
+
 interface
-uses windows,shellapi,sysutils,classes,util,math;
+uses windows,shellapi,sysutils,classes,Util,math;
 Type TTool=class
   public
     Name:String;
@@ -16,7 +18,7 @@ procedure LoadTools;
 procedure SaveTools;
 
 implementation
-uses config,inifiles;
+uses Config,inifiles;
 
 procedure LoadTools;
 var sl:TStringlist;
