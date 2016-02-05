@@ -215,7 +215,7 @@ begin
   Settings.ddemulate:=ddemulate.Checked;
 
   NeedsRestart:=ScInstallPath.text<>GamePath;
-  SetGamePath(ScInstallPath.text);
+  //SetGamePath(ScInstallPath.text);
   ScInstallPath.text:=GamePath;
   Settings.Save;
   SettingsOk.Enabled:=false;

@@ -19,7 +19,7 @@ Type TSettings=record
     end;
     
 var Settings:TSettings;
-    ini:TRegistryInifile;
+    ini:TInifile;
 implementation
 { TSettings }
 
@@ -28,10 +28,10 @@ var reg:TRegistry;
 begin
   StartMinimized:=ini.ReadBool('Launcher','StartMinimized',false);
   MinimizeOnRun:=ini.ReadBool('Launcher','MinimizeOnRun',false);
-  RunScOnStartup:=ini.ReadBool('Launcher','RunScOnStartup',false);
+  RunScOnStartup:=ini.ReadBool('Launcher','RunScOnStartup',true);
   AutoUpdate:=ini.ReadBool('Launcher','AutoUpdate',false);
   WarnNoAdmin:=ini.ReadBool('Launcher','WarnNoAdmin',true);
-  AllowMultiInstance:=ini.ReadBool('Launcher','AllowMultiInstance',false);
+  AllowMultiInstance:=ini.ReadBool('Launcher','AllowMultiInstance',true);
   ddemulate:=ini.ReadBool('Launcher','ddemulate',false);
   reg:=nil;
   try
@@ -68,7 +68,8 @@ begin
 end;
 
 initialization
-  ini:=TRegistryInifile.create('Software\Chaoslauncher');
+  //ini:=TRegistryInifile.create('Software\Chaoslauncher');
+  ini:=TInifile.create('Settings.ini');
 finalization
   ini.free;
   ini:=nil;

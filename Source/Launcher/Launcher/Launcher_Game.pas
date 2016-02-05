@@ -25,7 +25,11 @@ begin
 end;
 
 procedure UpdateGamePath;
-var reg:TRegistry;
+//var reg:TRegistry;
+const
+      C_FNAME = 'settings.txt';
+var tfIn: TextFile;
+    s: string;
 begin
   //reg:=nil;
   //try
@@ -43,7 +47,32 @@ begin
   //finally
   //  reg.free;
   //end;
-  FGamePath:='E:\Games\Starcraft\';
+
+
+  AssignFile(tfIn, C_FNAME);
+
+  // Embed the file handling in a try/except block to handle errors gracefully
+  try
+    // Open the file for reading
+    reset(tfIn);
+
+    // Keep reading lines until the end of the file is reached
+    //while not eof(tfIn) do
+    //begin
+      readln(tfIn, s);
+    //  writeln(s);
+    //end;
+
+    // Done so close the file
+    CloseFile(tfIn);
+
+  except
+    on E: EInOutError do
+     writeln('File handling error occurred. Details: ', E.Message);
+  end;
+
+  //FGamePath:='E:\Games\Starcraft\';
+  FGamePath:=s;
 end;
 
 procedure SetGamePath(NewPath:String);
