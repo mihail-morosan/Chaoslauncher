@@ -56,6 +56,7 @@ begin
   ini.WriteBool('Launcher','WarnNoAdmin',WarnNoAdmin);
   ini.WriteBool('Launcher','AllowMultiInstance',AllowMultiInstance);
   ini.WriteBool('Launcher','ddemulate',ddemulate);
+  ini.WriteString('Launcher','GamePath',GamePath);
   reg:=nil;
   try
     reg:=TRegistry.create;

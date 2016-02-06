@@ -15,7 +15,7 @@ function GameFindProcessID:Cardinal;
 procedure GameListVersions;
 
 implementation
-uses windows,sysutils,registry,Plugins,versions,Util;
+uses windows,sysutils,registry,Plugins,versions,Util,inifiles;
 
 var FGamePath:String;
 
@@ -30,6 +30,7 @@ const
       C_FNAME = 'settings.txt';
 var tfIn: TextFile;
     s: string;
+    ini:TInifile;
 begin
   //reg:=nil;
   //try
@@ -48,50 +49,31 @@ begin
   //  reg.free;
   //end;
 
+  ini:=TInifile.create('Settings.ini');
 
-  AssignFile(tfIn, C_FNAME);
+  FGamePath:=ini.ReadString('Launcher','GamePath','C:\Starcraft\');
 
-  // Embed the file handling in a try/except block to handle errors gracefully
-  try
-    // Open the file for reading
-    reset(tfIn);
+  ini.free;
 
-    // Keep reading lines until the end of the file is reached
-    //while not eof(tfIn) do
-    //begin
-      readln(tfIn, s);
-    //  writeln(s);
-    //end;
+  //AssignFile(tfIn, C_FNAME);
+  //
+  //try
+  //  reset(tfIn);
+  //  readln(tfIn, s);
+  //  CloseFile(tfIn);
+  //
+  //except
+  //  on E: EInOutError do
+  //   writeln('File handling error occurred. Details: ', E.Message);
+  //end;
 
-    // Done so close the file
-    CloseFile(tfIn);
-
-  except
-    on E: EInOutError do
-     writeln('File handling error occurred. Details: ', E.Message);
-  end;
-
-  //FGamePath:='E:\Games\Starcraft\';
-  FGamePath:=s;
+  //FGamePath:=s;
 end;
 
 procedure SetGamePath(NewPath:String);
 var reg:TRegistry;
 begin
-  reg:=nil;
-  try
-    if(NewPath<>'')and
-      (NewPath[length(NewPath)]<>'\')
-      then NewPath:=NewPath+'\';
-    reg:=TRegistry.create;
-    reg.RootKey:=HKEY_LOCAL_MACHINE;
-    reg.OpenKey('SOFTWARE\Blizzard Entertainment\Starcraft',true);
-    reg.WriteString('InstallPath',copy(NewPath,1,length(NewPath)-1));//Remove trailing \
-    reg.WriteString('Program',NewPath+'Starcraft.exe');
-    FGamePath:=NewPath;
-  finally
-    reg.free;
-  end;
+  FGamePath:=NewPath;
 end;
 
 procedure LoadGameInfo;
